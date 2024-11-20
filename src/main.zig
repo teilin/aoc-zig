@@ -1,24 +1,45 @@
+const clap = @import("clap");
 const std = @import("std");
+const model = @import("./model.zig");
+const Solver = @import("solver.zig").Solver;
 
 pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    //const allocator = gpa.allocator();
+    defer _ = gpa.deinit();
 
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
+    const params = comptime clap.parseParamsComptime(
+        \\-h, --help             Display this help and exit.
+        \\-y, --year             Year of the puzzel
+        \\-d, --day <usize>      An option parameter, which takes a value.
+        \\-f, --file <str>...    An option parameter which can be specified multiple times.
+        \\<str>...
+        \\
+    );
 
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
+    var diag = clap.Diagnostic{};
+    var res = clap.parse(clap.Help, &params, clap.parsers.default, .{
+        .diagnostic = &diag,
+        .allocator = gpa.allocator(),
+    }) catch |err| {
+        // Report useful error and exit
+        diag.report(std.io.getStdErr().writer(), err) catch {};
+        return err;
+    };
+    defer res.deinit();
 
-    try bw.flush(); // don't forget to flush!
-}
+    if (res.args.help != 0)
+        std.debug.print("--help\n", .{});
+    if (res.args.day) |n|
+        std.debug.print("--day = {}\n", .{n});
+    if (res.args.year != 0) |y|
+        std.debug.print("--year = {}", .{y});
+    for (res.args.file) |s|
+        std.debug.print("--file = {s}\n", .{s});
+    for (res.positionals[0]) |pos|
+        std.debug.print("{s}\n", .{pos});
 
-test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
+    const puzzel = try model.Puzzle.init(res.args.year, res.args.day, res.args.file);
+
+    Solver.init(puzzel);
 }
