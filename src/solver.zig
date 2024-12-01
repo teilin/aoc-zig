@@ -1,13 +1,13 @@
 const std = @import("std");
 const model = @import("model.zig");
 
-const Puzzel2023 = @import("2023.zig");
+const Puzzel2024 = @import("2024.zig").Puzzel2024;
 
 pub const Solver = struct {
-    pub fn init(puzzel: model.Puzzle) void {
+    pub fn init(allocator: std.mem.Allocator, puzzel: model.Puzzle) !void {
         switch (puzzel.Year) {
-            2023 => {
-                Puzzel2023.Puzzel2023.run(puzzel.Day, puzzel.FilePath);
+            2024 => {
+                try Puzzel2024.run(allocator, puzzel.Day);
             },
             else => {
                 std.debug.print("No puzzels yet", .{});

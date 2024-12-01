@@ -1,45 +1,90 @@
-const clap = @import("clap");
 const std = @import("std");
 const model = @import("./model.zig");
 const Solver = @import("solver.zig").Solver;
 
+const usage_text =
+    \\Usage: aoc-zig [options]
+    \\
+    \\Run the selected AOC solution
+    \\
+    \\Options:
+    \\ -y, --year <year>
+    \\ -d, --day <day>
+    \\
+;
+
+const Command = struct { raw_cmd: []const u8, argv: []const []const u8 };
+
 pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    //const allocator = gpa.allocator();
-    defer _ = gpa.deinit();
+    var arena_instance = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena_instance.deinit();
+    const arena = arena_instance.allocator();
 
-    const params = comptime clap.parseParamsComptime(
-        \\-h, --help             Display this help and exit.
-        \\-y, --year             Year of the puzzel
-        \\-d, --day <usize>      An option parameter, which takes a value.
-        \\-f, --file <str>...    An option parameter which can be specified multiple times.
-        \\<str>...
-        \\
-    );
+    const args = try std.process.argsAlloc(arena);
 
-    var diag = clap.Diagnostic{};
-    var res = clap.parse(clap.Help, &params, clap.parsers.default, .{
-        .diagnostic = &diag,
-        .allocator = gpa.allocator(),
-    }) catch |err| {
-        // Report useful error and exit
-        diag.report(std.io.getStdErr().writer(), err) catch {};
-        return err;
-    };
-    defer res.deinit();
+    var commands = std.ArrayList(Command).init(arena);
 
-    if (res.args.help != 0)
-        std.debug.print("--help\n", .{});
-    if (res.args.day) |n|
-        std.debug.print("--day = {}\n", .{n});
-    if (res.args.year != 0) |y|
-        std.debug.print("--year = {}", .{y});
-    for (res.args.file) |s|
-        std.debug.print("--file = {s}\n", .{s});
-    for (res.positionals[0]) |pos|
-        std.debug.print("{s}\n", .{pos});
+    var y: u64 = 2024;
+    var d: u64 = 1;
 
-    const puzzel = try model.Puzzle.init(res.args.year, res.args.day, res.args.file);
+    var arg_i: usize = 1;
+    while (arg_i < args.len) : (arg_i += 1) {
+        const arg = args[arg_i];
+        if (!std.mem.startsWith(u8, arg, "-")) {
+            var cmd_argv = std.ArrayList([]const u8).init(arena);
+            try parseCmd(&cmd_argv, arg);
+            try commands.append(.{
+                .raw_cmd = arg,
+                .argv = try cmd_argv.toOwnedSlice(),
+            });
+        } else if (std.mem.eql(u8, arg, "-h") or std.mem.eql(u8, arg, "--help")) {
+            // Print usage_text
+            return std.process.cleanExit();
+        } else if (std.mem.eql(u8, arg, "-y") or std.mem.eql(u8, arg, "--year")) {
+            arg_i += 1;
+            if (arg_i >= args.len) {
+                std.debug.print("'{s}' requires  a year.\n{s}", .{ arg, usage_text });
+                std.process.exit(1);
+            }
+            const next = args[arg_i];
+            const year = std.fmt.parseInt(u64, next, 10) catch |err| {
+                std.debug.print("unable to parse --year argument '{s}': {s}\n", .{
+                    next,
+                    @errorName(err),
+                });
+                std.process.exit(1);
+            };
+            y = year;
+        } else if (std.mem.eql(u8, arg, "-d") or std.mem.eql(u8, arg, "--day")) {
+            arg_i += 1;
+            if (arg_i >= args.len) {
+                std.debug.print("'{s}' requires a day.\n{s}", .{ arg, usage_text });
+                return std.process.exit(1);
+            }
+            const next = args[arg_i];
+            const day = std.fmt.parseInt(u64, next, 10) catch |err| {
+                std.debug.print("unable to parse --day argument '{s}': {s}\n", .{
+                    next,
+                    @errorName(err),
+                });
+                std.process.exit(1);
+            };
+            d = day;
+        } else {
+            std.debug.print("unrecognized argument: '{s}'\n{s}", .{ arg, usage_text });
+            std.process.exit(1);
+        }
+    }
 
-    Solver.init(puzzel);
+    const puzzel = try model.Puzzle.init(y, d);
+
+    var gpa = std.heap.GeneralPurposeAllocator(.{ .thread_safe = true }){};
+    const allocator = gpa.allocator();
+
+    try Solver.init(allocator, puzzel);
+}
+
+fn parseCmd(list: *std.ArrayList([]const u8), cmd: []const u8) !void {
+    var it = std.mem.tokenizeScalar(u8, cmd, ' ');
+    while (it.next()) |s| try list.append(s);
 }
