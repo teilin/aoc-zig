@@ -3,6 +3,7 @@ const std = @import("std");
 const Day01 = @import("./solvers/2024/day01.zig");
 const Day02 = @import("./solvers/2024/day02.zig");
 const Day03 = @import("./solvers/2024/day03.zig");
+const Day04 = @import("./solvers/2024/day04.zig");
 
 pub const Puzzel2024 = struct {
     allocator: std.mem.Allocator,
@@ -17,6 +18,9 @@ pub const Puzzel2024 = struct {
             },
             3 => {
                 try Day03.solve();
+            },
+            4 => {
+                try Day04.solve();
             },
             else => {
                 std.debug.print("No puzzel solver for day: {d}", .{day});
