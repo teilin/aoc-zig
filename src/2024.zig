@@ -48,7 +48,7 @@ pub const Puzzel2024 = struct {
                 try Day10.solve();
             },
             11 => {
-                try Day11.solve(allocator);
+                try Day11.solve();
             },
             else => {
                 std.debug.print("No puzzel solver for day: {d}", .{day});

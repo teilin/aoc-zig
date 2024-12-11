@@ -1,10 +1,10 @@
 const std = @import("std");
 
-pub fn solve(allocator: std.mem.Allocator) !void {
+pub fn solve() !void {
     const content = @embedFile("./data/day11.txt");
-    const p1 = try stones(allocator, content, 25);
+    const p1 = try stones(content, 25);
     std.debug.print("Part 1 -> {d}\n", .{p1});
-    const p2 = try stones(allocator, content, 75);
+    const p2 = try stones(content, 75);
     std.debug.print("Part 2 -> {d}\n", .{p2});
 }
 
@@ -34,22 +34,17 @@ fn calculate(num: usize, n: usize) usize {
     return cache.get(.{ num, n }).?;
 }
 
-fn stones(allocator: std.mem.Allocator, content: []const u8, rounds: usize) !usize {
+fn stones(content: []const u8, rounds: usize) !usize {
     var iter = std.mem.tokenizeSequence(u8, std.mem.trim(u8, content, "\n"), " ");
-    var arr = std.ArrayList(usize).init(allocator);
-    defer arr.deinit();
+    var out: usize = 0;
     while (iter.next()) |num| {
         const n = try std.fmt.parseUnsigned(usize, num, 10);
-        try arr.append(n);
-    }
-    var out: usize = 0;
-    for (arr.items) |num| {
-        out += calculate(num, rounds);
+        out += calculate(n, rounds);
     }
     return out;
 }
 
 test "part1 test" {
     const content = "125 17";
-    try std.testing.expectEqual(55312, stones(std.testing.allocator, content, 25));
+    try std.testing.expectEqual(55312, stones(content, 25));
 }
