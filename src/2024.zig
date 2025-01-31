@@ -13,6 +13,18 @@ const Day10 = @import("./solvers/2024/day10.zig");
 const Day11 = @import("./solvers/2024/day11.zig");
 const Day12 = @import("./solvers/2024/day12.zig");
 const Day13 = @import("./solvers/2024/day13.zig");
+const Day14 = @import("./solvers/2024/day14.zig");
+const Day15 = @import("./solvers/2024/day15.zig");
+const Day16 = @import("./solvers/2024/day16.zig");
+const Day17 = @import("./solvers/2024/day17.zig");
+const Day18 = @import("./solvers/2024/day18.zig");
+const Day19 = @import("./solvers/2024/day19.zig");
+const Day20 = @import("./solvers/2024/day20.zig");
+const Day21 = @import("./solvers/2024/day21.zig");
+const Day22 = @import("./solvers/2024/day22.zig");
+const Day23 = @import("./solvers/2024/day23.zig");
+const Day24 = @import("./solvers/2024/day24.zig");
+const Day25 = @import("./solvers/2024/day25.zig");
 
 pub const Puzzel2024 = struct {
     allocator: std.mem.Allocator,
@@ -57,6 +69,42 @@ pub const Puzzel2024 = struct {
             },
             13 => {
                 try Day13.solve(allocator);
+            },
+            14 => {
+                try Day14.solve(allocator);
+            },
+            15 => {
+                try Day15.solve(allocator);
+            },
+            16 => {
+                try Day16.solve(allocator);
+            },
+            17 => {
+                try Day17.solve();
+            },
+            18 => {
+                try Day18.solve(allocator);
+            },
+            19 => {
+                try Day19.solve(allocator);
+            },
+            20 => {
+                try Day20.solve(allocator);
+            },
+            21 => {
+                try Day21.solve();
+            },
+            22 => {
+                try Day22.solve(allocator);
+            },
+            23 => {
+                try Day23.solve(allocator);
+            },
+            24 => {
+                try Day24.solve();
+            },
+            25 => {
+                try Day25.solve(allocator);
             },
             else => {
                 std.debug.print("No puzzel solver for day: {d}", .{day});
