@@ -24,7 +24,7 @@ fn part1(allocator: std.mem.Allocator, content: []const u8) !u64 {
 
     var seen = std.AutoHashMap(Position, void).init(allocator);
     defer seen.deinit();
-    var regions = try std.ArrayList(Region).initCapacity(allocator, 128);
+    var regions = try std.array_list.Managed(Region).initCapacity(allocator, 128);
     defer regions.deinit();
     defer for (regions.items) |*region| region.deinit();
 
@@ -35,7 +35,7 @@ fn part1(allocator: std.mem.Allocator, content: []const u8) !u64 {
             const item = array.at(pos.row, pos.col) orelse unreachable;
 
             var region = Region{
-                .positions = try std.ArrayList(Position).initCapacity(allocator, 128),
+                .positions = try std.array_list.Managed(Position).initCapacity(allocator, 128),
                 .item = item,
             };
 
@@ -77,7 +77,7 @@ const Position = struct {
 const SideDir = enum { vertical, horizontal };
 
 const Region = struct {
-    positions: std.ArrayList(Position),
+    positions: std.array_list.Managed(Position),
     item: u8,
 
     const Self = @This();
@@ -197,7 +197,7 @@ fn makeNeighbors(pos: Position) [4]Position {
     };
 }
 
-fn collectRegion(array: *const Array, item: u8, start: Position, positions: *std.ArrayList(Position), seen_positions: *std.AutoHashMap(Position, void)) !void {
+fn collectRegion(array: *const Array, item: u8, start: Position, positions: *std.array_list.Managed(Position), seen_positions: *std.AutoHashMap(Position, void)) !void {
     if (seen_positions.contains(start)) return;
     if (array.at(start.row, start.col) != item) return;
     try positions.append(start);
@@ -224,7 +224,7 @@ fn part2(allocator: std.mem.Allocator, content: []const u8) !u64 {
 
     var seen = std.AutoHashMap(Position, void).init(allocator);
     defer seen.deinit();
-    var regions = try std.ArrayList(Region).initCapacity(allocator, 128);
+    var regions = try std.array_list.Managed(Region).initCapacity(allocator, 128);
     defer regions.deinit();
     defer for (regions.items) |*region| region.deinit();
 
@@ -235,7 +235,7 @@ fn part2(allocator: std.mem.Allocator, content: []const u8) !u64 {
             const item = array.at(pos.row, pos.col) orelse unreachable;
 
             var region = Region{
-                .positions = try std.ArrayList(Position).initCapacity(allocator, 128),
+                .positions = try std.array_list.Managed(Position).initCapacity(allocator, 128),
                 .item = item,
             };
 

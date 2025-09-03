@@ -13,7 +13,7 @@ const Robot = struct {
     }
 };
 
-const RobotList = std.ArrayList(Robot);
+const RobotList = std.array_list.Managed(Robot);
 
 fn add(a: Coordinate, b: Coordinate) Coordinate {
     return Coordinate{ a[0] + b[0], a[1] + b[1] };

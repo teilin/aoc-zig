@@ -6,14 +6,14 @@ const OrderingRule = struct {
 };
 
 const Prints = struct {
-    rules: std.ArrayList(OrderingRule),
-    manuals: std.ArrayList([]const u8),
+    rules: std.array_list.Managed(OrderingRule),
+    manuals: std.array_list.Managed([]const u8),
     allocator: std.mem.Allocator,
 
     pub fn init(allocator: std.mem.Allocator, content: []const u8) !@This() {
         var lineIter = std.mem.tokenizeSequence(u8, content, "\n");
-        var rules = std.ArrayList(OrderingRule).init(allocator);
-        var manuals = std.ArrayList([]const u8).init(allocator);
+        var rules = std.array_list.Managed(OrderingRule).init(allocator);
+        var manuals = std.array_list.Managed([]const u8).init(allocator);
         while (lineIter.next()) |line| {
             const pipe = std.mem.indexOf(u8, line, "|");
             if (pipe) |pipeIndex| {

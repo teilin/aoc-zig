@@ -17,7 +17,7 @@ fn calibration(allocator: std.mem.Allocator, content: []const u8, tgt: usize) !u
         const firstVal = num_iter.next().?;
         const val = try std.fmt.parseInt(u64, firstVal[0 .. firstVal.len - 1], 10);
 
-        var list = std.ArrayList(u64).init(allocator);
+        var list = std.array_list.Managed(u64).init(allocator);
         defer list.deinit();
 
         while (num_iter.next()) |num_str| {

@@ -78,7 +78,7 @@ fn predictedWalking(allocator: std.mem.Allocator, content: []const u8) !u64 {
 }
 
 fn numDifferentPossitions(allocator: std.mem.Allocator, content: []const u8) !u32 {
-    var lines = std.ArrayList([]u8).init(allocator);
+    var lines = std.array_list.Managed([]u8).init(allocator);
     defer lines.deinit();
     var iter = std.mem.tokenizeScalar(u8, content, '\n');
     while (iter.next()) |line| {
@@ -130,7 +130,7 @@ const Grid = struct {
     sizeY: usize,
 
     pub fn init(allocator: std.mem.Allocator, map: [][]u8) !Grid {
-        var lines = std.ArrayList([]u8).init(allocator);
+        var lines = std.array_list.Managed([]u8).init(allocator);
         for (map) |line| {
             const owned = try allocator.dupe(u8, line);
             try lines.append(owned);
@@ -170,7 +170,7 @@ const Walker = struct {
     dx: i32,
     dy: i32,
 
-    pub fn start(grid: [][]const u8) struct { x: i32, y: i32 } {
+    pub fn start(grid: [][]u8) struct { x: i32, y: i32 } {
         const lenY = grid.len;
         const lenX = grid[0].len;
         for (0..lenY) |y| {
@@ -183,7 +183,7 @@ const Walker = struct {
         unreachable;
     }
 
-    pub fn init(grid: [][]const u8) Walker {
+    pub fn init(grid: [][]u8) Walker {
         const s = Walker.start(grid);
         return Walker{ .x = s.x, .y = s.y, .dx = 0, .dy = -1 };
     }

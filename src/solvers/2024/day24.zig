@@ -186,7 +186,7 @@ fn solve_part1(wires: WireMap, ops: OpMap) !usize {
 }
 
 fn solve_part2(wires: WireMap, ops: OpMap, rev_ops: ReverseOpMap) ![]u8 {
-    var problems = std.ArrayList([]const u8).init(allocator);
+    var problems = std.array_list.Managed([]const u8).init(allocator);
 
     var x = [3]u8{ 'x', '0', '0' };
     var y = [3]u8{ 'y', '0', '0' };

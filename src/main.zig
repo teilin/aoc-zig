@@ -22,7 +22,7 @@ pub fn main() !void {
 
     const args = try std.process.argsAlloc(arena);
 
-    var commands = std.ArrayList(Command).init(arena);
+    var commands = std.array_list.Managed(Command).init(arena);
 
     var y: u64 = 2024;
     var d: u64 = 1;
@@ -31,7 +31,7 @@ pub fn main() !void {
     while (arg_i < args.len) : (arg_i += 1) {
         const arg = args[arg_i];
         if (!std.mem.startsWith(u8, arg, "-")) {
-            var cmd_argv = std.ArrayList([]const u8).init(arena);
+            var cmd_argv = std.array_list.Managed([]const u8).init(arena);
             try parseCmd(&cmd_argv, arg);
             try commands.append(.{
                 .raw_cmd = arg,
@@ -84,7 +84,7 @@ pub fn main() !void {
     try Solver.init(allocator, puzzel);
 }
 
-fn parseCmd(list: *std.ArrayList([]const u8), cmd: []const u8) !void {
+fn parseCmd(list: *std.array_list.Managed([]const u8), cmd: []const u8) !void {
     var it = std.mem.tokenizeScalar(u8, cmd, ' ');
     while (it.next()) |s| try list.append(s);
 }

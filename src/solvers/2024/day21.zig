@@ -6,7 +6,7 @@ const allocator = gpa_impl.allocator();
 
 const Point = [2]i32;
 const Map = std.AutoHashMap(Point, u8);
-const Path = std.ArrayList(u8);
+const Path = std.array_list.Managed(u8);
 
 const numpad_str = "789\n456\n123\n#0A";
 const dirpad_str = "#^A\n<v>";

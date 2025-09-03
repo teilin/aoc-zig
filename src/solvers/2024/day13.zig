@@ -11,7 +11,7 @@ const Game = struct {
     Prize: Move,
 };
 
-const GameList = std.ArrayList(Game);
+const GameList = std.array_list.Managed(Game);
 
 pub fn solve(allocator: std.mem.Allocator) !void {
     const content = @embedFile("./data/day13.txt");

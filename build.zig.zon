@@ -1,15 +1,9 @@
 .{
-    .name = "aoc-zig",
-
+    .name = .aoc_zig,
     .version = "0.0.0",
-
-    .dependencies = .{
-        .clap = .{
-            .url = "git+https://github.com/Hejsil/zig-clap#2e58c8e49a0da7075fc66e4ae499b7acc5ea5a3f",
-            .hash = "1220bee7158b31d74899f04f39352e3cb875a3287324f28f9217f9e5618f018a2708",
-        },
-    },
-
+    .fingerprint = 0x3a7cfe5aae62ae32,
+    .minimum_zig_version = "0.15.1",
+    .dependencies = .{},
     .paths = .{
         "build.zig",
         "build.zig.zon",

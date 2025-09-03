@@ -10,7 +10,7 @@ pub fn solve(allocator: std.mem.Allocator) !void {
 }
 
 fn defragment(allocator: std.mem.Allocator, content: []const u8) !usize {
-    var fragments = std.ArrayList(?usize).init(allocator);
+    var fragments = std.array_list.Managed(?usize).init(allocator);
     defer fragments.deinit();
 
     var iter = std.mem.window(u8, content, 2, 2);
@@ -43,7 +43,7 @@ fn defragment(allocator: std.mem.Allocator, content: []const u8) !usize {
 }
 
 fn fileMove(allocator: std.mem.Allocator, content: []const u8) !usize {
-    var fragments = std.ArrayList(?usize).init(allocator);
+    var fragments = std.array_list.Managed(?usize).init(allocator);
     defer fragments.deinit();
 
     var iter = std.mem.window(u8, content, 2, 2);

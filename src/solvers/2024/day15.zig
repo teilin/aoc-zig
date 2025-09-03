@@ -96,7 +96,7 @@ fn isMoveable(map: *WallMap, boxes: *BoxMap, p: Point, v: Point) bool {
 fn moveBoxes(alloc: std.mem.Allocator, boxes: *BoxMap, p: Point, v: Point) !void {
     var c = add(p, v);
 
-    var list = std.ArrayList(Point).init(alloc);
+    var list = std.array_list.Managed(Point).init(alloc);
     defer list.deinit();
 
     while (true) : (c = add(c, v)) {
@@ -133,7 +133,7 @@ fn isMoveable2(map: *WallMap, boxes: *BoxMap, p: Point, v: Point) bool {
     }
 }
 
-fn moveBoxes2(boxes: *BoxMap, p: Point, v: Point, list: *std.ArrayList(Point)) !void {
+fn moveBoxes2(boxes: *BoxMap, p: Point, v: Point, list: *std.array_list.Managed(Point)) !void {
     const c = add(p, v);
 
     const a = boxes.remove(c);
@@ -176,7 +176,7 @@ fn part1(alloc: std.mem.Allocator, content: []const u8) !i32 {
 
     try parseMap(parts_iter.next().?, &pos, &boxes, &map);
 
-    var dirs = std.ArrayList(Point).init(alloc);
+    var dirs = std.array_list.Managed(Point).init(alloc);
     defer dirs.deinit();
 
     const parts = parts_iter.next().?;
@@ -214,7 +214,7 @@ fn part2(alloc: std.mem.Allocator, content: []const u8) !i32 {
 
     try parseMap2(parts_iter.next().?, &pos, &boxes, &map);
 
-    var dirs = std.ArrayList(Point).init(alloc);
+    var dirs = std.array_list.Managed(Point).init(alloc);
     defer dirs.deinit();
 
     const part = parts_iter.next().?;
@@ -226,7 +226,7 @@ fn part2(alloc: std.mem.Allocator, content: []const u8) !i32 {
 
     for (dirs.items) |d| {
         if (isMoveable2(&map, &boxes, pos, d)) {
-            var list = std.ArrayList(Point).init(alloc);
+            var list = std.array_list.Managed(Point).init(alloc);
             defer list.deinit();
             try moveBoxes2(&boxes, pos, d, &list);
             pos = add(pos, d);

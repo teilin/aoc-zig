@@ -112,7 +112,7 @@ fn p1(text: []const u8) !u32 {
     _ = siter.next().?;
     var iter = std.mem.tokenizeSequence(u8, siter.next().?, ",");
 
-    var memory = std.ArrayList(i64).init(gpa);
+    var memory = std.array_list.Managed(i64).init(gpa);
     defer memory.deinit();
     while (iter.next()) |n| {
         const v = try std.fmt.parseInt(i64, n, 10);

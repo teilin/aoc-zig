@@ -13,7 +13,7 @@ fn safeReport(allocator: std.mem.Allocator, content: []const u8, has_damper: boo
     var readIter = std.mem.tokenizeSequence(u8, content, "\n");
     while (readIter.next()) |line| {
         var words = std.mem.tokenizeSequence(u8, line, " ");
-        var levels = std.ArrayList(i32).init(allocator);
+        var levels = std.array_list.Managed(i32).init(allocator);
         defer levels.deinit();
         while (words.next()) |w| {
             const iw = try std.fmt.parseInt(i32, w, 10);

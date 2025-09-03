@@ -15,8 +15,8 @@ fn distance(allocator: std.mem.Allocator, content: []const u8, is_weighted: bool
     var result: i32 = 0;
     var readIter = std.mem.tokenizeSequence(u8, content, "\n");
 
-    var left = std.ArrayList(i32).init(allocator);
-    var right = std.ArrayList(i32).init(allocator);
+    var left = std.array_list.Managed(i32).init(allocator);
+    var right = std.array_list.Managed(i32).init(allocator);
 
     var counter = std.AutoHashMap(i32, i32).init(allocator);
 

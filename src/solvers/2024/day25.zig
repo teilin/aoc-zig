@@ -11,10 +11,10 @@ pub fn solve(alloc: std.mem.Allocator) !void {
 }
 
 fn part1(alloc: std.mem.Allocator, content: []const u8) !u32 {
-    var locks = std.ArrayList([W]usize).init(alloc);
+    var locks = std.array_list.Managed([W]usize).init(alloc);
     defer locks.deinit();
 
-    var keys = std.ArrayList([W]usize).init(alloc);
+    var keys = std.array_list.Managed([W]usize).init(alloc);
     defer keys.deinit();
 
     var it_schematics = std.mem.splitSequence(u8, content, "\n\n");

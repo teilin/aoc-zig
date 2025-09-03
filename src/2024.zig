@@ -86,7 +86,7 @@ pub const Puzzel2024 = struct {
                 try Day18.solve(allocator);
             },
             19 => {
-                try Day19.solve(allocator);
+                //try Day19.solve(allocator);
             },
             20 => {
                 try Day20.solve(allocator);
@@ -98,7 +98,7 @@ pub const Puzzel2024 = struct {
                 try Day22.solve(allocator);
             },
             23 => {
-                try Day23.solve(allocator);
+                try Day23.solve();
             },
             24 => {
                 try Day24.solve();

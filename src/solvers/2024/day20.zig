@@ -33,7 +33,7 @@ fn part1(allocator: std.mem.Allocator, content: []const u8) !usize {
     const path = try aStar(allocator, maze, start, end);
     defer allocator.free(path);
 
-    var poss_cheats = std.AutoArrayHashMap(Vec2, std.ArrayList(Vec2)).init(allocator);
+    var poss_cheats = std.AutoArrayHashMap(Vec2, std.array_list.Managed(Vec2)).init(allocator);
     defer {
         var iter = poss_cheats.iterator();
         while (iter.next()) |entry| {
@@ -50,7 +50,7 @@ fn part1(allocator: std.mem.Allocator, content: []const u8) !usize {
         for (path[i..]) |pos2| {
             const distance = manhattanDistance(pos1, pos2);
             if (distance == 2) {
-                var l = poss_cheats.get(pos1) orelse std.ArrayList(Vec2).init(allocator);
+                var l = poss_cheats.get(pos1) orelse std.array_list.Managed(Vec2).init(allocator);
                 try l.append(pos2);
                 try poss_cheats.put(pos1, l);
                 const v = cheat_times.get(@intCast(i - 1)) orelse 0;
@@ -91,7 +91,7 @@ fn part2(allocator: std.mem.Allocator, content: []const u8) !usize {
     const path = try aStar(allocator, maze, start, end);
     defer allocator.free(path);
 
-    var cheats = std.AutoArrayHashMap(Vec2, std.ArrayList(Vec2)).init(allocator);
+    var cheats = std.AutoArrayHashMap(Vec2, std.array_list.Managed(Vec2)).init(allocator);
     defer {
         for (cheats.values()) |l| {
             l.deinit();
@@ -112,7 +112,7 @@ fn part2(allocator: std.mem.Allocator, content: []const u8) !usize {
             const path_d: usize = cheat_end - cheat_start;
             const saved_d = path_d - cheat_d;
             if (saved_d >= 100) {
-                var l = cheats.get(pos1) orelse std.ArrayList(Vec2).init(allocator);
+                var l = cheats.get(pos1) orelse std.array_list.Managed(Vec2).init(allocator);
                 try l.append(pos2);
                 try cheats.put(pos1, l);
                 const v = cheat_times.get(saved_d) orelse 0;
@@ -190,7 +190,7 @@ pub fn aStar(allocator: std.mem.Allocator, maze: std.AutoArrayHashMap(Vec2, u8),
 }
 
 fn reconstructPath(allocator: std.mem.Allocator, cameFrom: std.AutoArrayHashMap(Vec2, Vec2), current: Vec2) ![]Vec2 {
-    var totalPath = std.ArrayList(Vec2).init(allocator);
+    var totalPath = std.array_list.Managed(Vec2).init(allocator);
     defer totalPath.deinit();
 
     try totalPath.append(current);

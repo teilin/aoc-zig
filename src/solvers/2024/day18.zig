@@ -32,7 +32,7 @@ const State = struct {
 };
 
 fn dijkstra(allocator: *const std.mem.Allocator, grid: [][]bool, seen: [][]bool) !i32 {
-    var q = std.ArrayList(State).init(allocator.*);
+    var q = std.array_list.Managed(State).init(allocator.*);
     defer q.deinit();
 
     try q.append(State{ .xy = Vec2{ .x = 0, .y = 0 }, .path_length = 0 });
@@ -41,28 +41,28 @@ fn dijkstra(allocator: *const std.mem.Allocator, grid: [][]bool, seen: [][]bool)
     const HEIGHT = grid.len;
 
     while (q.items.len > 0) {
-        const state: State = q.pop();
-        if (seen[state.xy.y][state.xy.x])
+        const state: ?State = q.pop();
+        if (seen[state.?.xy.y][state.?.xy.x])
             continue;
 
-        seen[state.xy.y][state.xy.x] = true;
+        seen[state.?.xy.y][state.?.xy.x] = true;
 
-        if (state.xy.x == WIDTH - 1 and state.xy.y == HEIGHT - 1)
-            return @as(i32, @intCast(state.path_length));
+        if (state.?.xy.x == WIDTH - 1 and state.?.xy.y == HEIGHT - 1)
+            return @as(i32, @intCast(state.?.path_length));
 
         var dir_idx: u32 = 0;
         while (dir_idx < 4) : (dir_idx += 1) {
             const x = switch (dir_idx) {
-                0 => state.xy.x + 1,
-                2 => state.xy.x -% 1,
-                1, 3 => state.xy.x,
+                0 => state.?.xy.x + 1,
+                2 => state.?.xy.x -% 1,
+                1, 3 => state.?.xy.x,
                 else => unreachable,
             };
 
             const y = switch (dir_idx) {
-                0, 2 => state.xy.y,
-                1 => state.xy.y + 1,
-                3 => state.xy.y -% 1,
+                0, 2 => state.?.xy.y,
+                1 => state.?.xy.y + 1,
+                3 => state.?.xy.y -% 1,
                 else => unreachable,
             };
 
@@ -73,7 +73,7 @@ fn dijkstra(allocator: *const std.mem.Allocator, grid: [][]bool, seen: [][]bool)
             if (grid_pos)
                 continue;
 
-            try q.insert(0, State{ .xy = Vec2{ .x = x, .y = y }, .path_length = state.path_length + 1 });
+            try q.insert(0, State{ .xy = Vec2{ .x = x, .y = y }, .path_length = state.?.path_length + 1 });
         }
     }
 
@@ -82,7 +82,7 @@ fn dijkstra(allocator: *const std.mem.Allocator, grid: [][]bool, seen: [][]bool)
 
 pub fn solve(allocator: std.mem.Allocator) !void {
     const content = @embedFile("./data/day18.txt");
-    var positions = std.ArrayList(Vec2).init(allocator);
+    var positions = std.array_list.Managed(Vec2).init(allocator);
     defer positions.deinit();
 
     var line_iter = std.mem.tokenizeSequence(u8, content, "\n");
