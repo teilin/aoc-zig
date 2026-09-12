@@ -27,18 +27,18 @@ const Seq = std.ArrayList(i64);
 const Seq4 = [4]i64;
 
 fn Set(Type: type) type {
-    return std.AutoArrayHashMap(Type, void);
+    return std.AutoArrayHashMapUnmanaged(Type, void);
 }
 
 fn part2(alloc: std.mem.Allocator, content: []const u8) !i64 {
     const Diffs = @Vector(4, i8);
 
-    var seen = Set(Diffs).init(alloc);
-    defer seen.deinit();
+    var seen: Set(Diffs) = .empty;
+    defer seen.deinit(alloc);
 
     // Total number of bananas for the given diff sequence
-    var bananas = std.AutoArrayHashMap(Diffs, i64).init(alloc);
-    defer bananas.deinit();
+    var bananas: std.AutoArrayHashMapUnmanaged(Diffs, i64) = .empty;
+    defer bananas.deinit(alloc);
 
     var line_it = std.mem.tokenizeScalar(u8, content, '\n');
     while (line_it.next()) |line| {
@@ -72,9 +72,9 @@ fn part2(alloc: std.mem.Allocator, content: []const u8) !i64 {
                 if (seen.contains(diff)) {
                     continue;
                 }
-                try seen.put(diff, {});
+                try seen.put(alloc, diff, {});
 
-                (try bananas.getOrPutValue(diff, 0)).value_ptr.* += num;
+                (try bananas.getOrPutValue(alloc, diff, 0)).value_ptr.* += num;
             }
         }
     }

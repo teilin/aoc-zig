@@ -11,8 +11,8 @@ pub fn solve(allocator: std.mem.Allocator) !void {
 
 fn part1(allocator: std.mem.Allocator, content: []const u8) !usize {
     var lines = std.mem.tokenizeScalar(u8, content, '\n');
-    var maze = std.AutoArrayHashMap(Vec2, u8).init(allocator);
-    defer maze.deinit();
+    var maze: std.AutoArrayHashMapUnmanaged(Vec2, u8) = .empty;
+    defer maze.deinit(allocator);
 
     var row: i64 = 0;
     var cols: i64 = 0;
@@ -21,7 +21,7 @@ fn part1(allocator: std.mem.Allocator, content: []const u8) !usize {
         var col: i64 = 0;
         for (line) |char| {
             const pos = .{ col, row };
-            try maze.put(pos, char);
+            try maze.put(allocator, pos, char);
             col += 1;
         }
         row += 1;
@@ -33,16 +33,16 @@ fn part1(allocator: std.mem.Allocator, content: []const u8) !usize {
     const path = try aStar(allocator, maze, start, end);
     defer allocator.free(path);
 
-    var poss_cheats = std.AutoArrayHashMap(Vec2, std.array_list.Managed(Vec2)).init(allocator);
+    var poss_cheats: std.AutoArrayHashMapUnmanaged(Vec2, std.array_list.Managed(Vec2)) = .empty;
     defer {
         var iter = poss_cheats.iterator();
         while (iter.next()) |entry| {
             entry.value_ptr.deinit();
         }
-        poss_cheats.deinit();
+        poss_cheats.deinit(allocator);
     }
-    var cheat_times = std.AutoArrayHashMap(u64, u64).init(allocator);
-    defer cheat_times.deinit();
+    var cheat_times: std.AutoArrayHashMapUnmanaged(u64, u64) = .empty;
+    defer cheat_times.deinit(allocator);
     for (path, 101..) |pos1, i| {
         if (i >= path.len) {
             break;
@@ -52,9 +52,9 @@ fn part1(allocator: std.mem.Allocator, content: []const u8) !usize {
             if (distance == 2) {
                 var l = poss_cheats.get(pos1) orelse std.array_list.Managed(Vec2).init(allocator);
                 try l.append(pos2);
-                try poss_cheats.put(pos1, l);
+                try poss_cheats.put(allocator, pos1, l);
                 const v = cheat_times.get(@intCast(i - 1)) orelse 0;
-                try cheat_times.put(@intCast(i - 1), v + 1);
+                try cheat_times.put(allocator, @intCast(i - 1), v + 1);
             }
         }
     }
@@ -69,8 +69,8 @@ fn part1(allocator: std.mem.Allocator, content: []const u8) !usize {
 
 fn part2(allocator: std.mem.Allocator, content: []const u8) !usize {
     var lines = std.mem.tokenizeScalar(u8, content, '\n');
-    var maze = std.AutoArrayHashMap(Vec2, u8).init(allocator);
-    defer maze.deinit();
+    var maze: std.AutoArrayHashMapUnmanaged(Vec2, u8) = .empty;
+    defer maze.deinit(allocator);
 
     var row: i64 = 0;
     var cols: i64 = 0;
@@ -79,7 +79,7 @@ fn part2(allocator: std.mem.Allocator, content: []const u8) !usize {
         var col: i64 = 0;
         for (line) |char| {
             const pos = .{ col, row };
-            try maze.put(pos, char);
+            try maze.put(allocator, pos, char);
             col += 1;
         }
         row += 1;
@@ -91,16 +91,16 @@ fn part2(allocator: std.mem.Allocator, content: []const u8) !usize {
     const path = try aStar(allocator, maze, start, end);
     defer allocator.free(path);
 
-    var cheats = std.AutoArrayHashMap(Vec2, std.array_list.Managed(Vec2)).init(allocator);
+    var cheats: std.AutoArrayHashMapUnmanaged(Vec2, std.array_list.Managed(Vec2)) = .empty;
     defer {
         for (cheats.values()) |l| {
             l.deinit();
         }
-        cheats.deinit();
+        cheats.deinit(allocator);
     }
 
-    var cheat_times = std.AutoArrayHashMap(u64, u64).init(allocator);
-    defer cheat_times.deinit();
+    var cheat_times: std.AutoArrayHashMapUnmanaged(u64, u64) = .empty;
+    defer cheat_times.deinit(allocator);
     for (path, 0.., 101..) |pos1, cheat_start, i| {
         if (i >= path.len) {
             break;
@@ -114,9 +114,9 @@ fn part2(allocator: std.mem.Allocator, content: []const u8) !usize {
             if (saved_d >= 100) {
                 var l = cheats.get(pos1) orelse std.array_list.Managed(Vec2).init(allocator);
                 try l.append(pos2);
-                try cheats.put(pos1, l);
+                try cheats.put(allocator, pos1, l);
                 const v = cheat_times.get(saved_d) orelse 0;
-                try cheat_times.put(saved_d, v + 1);
+                try cheat_times.put(allocator, saved_d, v + 1);
             }
         }
     }
@@ -151,20 +151,20 @@ const directions = [_]Vec2{
     Vec2{ 0, 1 },
 };
 
-pub fn aStar(allocator: std.mem.Allocator, maze: std.AutoArrayHashMap(Vec2, u8), start: Vec2, goal: Vec2) ![]Vec2 {
-    var open_set = std.PriorityQueue(PqItem, void, lessThan).init(allocator, {});
-    defer open_set.deinit();
-    try open_set.add(.{ .pos = start, .f_score = manhattanDistance(start, goal) });
+pub fn aStar(allocator: std.mem.Allocator, maze: std.AutoArrayHashMapUnmanaged(Vec2, u8), start: Vec2, goal: Vec2) ![]Vec2 {
+    var open_set: std.PriorityQueue(PqItem, void, lessThan) = .empty;
+    defer open_set.deinit(allocator);
+    try open_set.push(allocator, .{ .pos = start, .f_score = manhattanDistance(start, goal) });
 
-    var came_from = std.AutoArrayHashMap(Vec2, Vec2).init(allocator);
-    defer came_from.deinit();
+    var came_from: std.AutoArrayHashMapUnmanaged(Vec2, Vec2) = .empty;
+    defer came_from.deinit(allocator);
 
-    var g_score = std.AutoArrayHashMap(Vec2, i64).init(allocator);
-    defer g_score.deinit();
-    try g_score.put(start, 0);
+    var g_score: std.AutoArrayHashMapUnmanaged(Vec2, i64) = .empty;
+    defer g_score.deinit(allocator);
+    try g_score.put(allocator, start, 0);
 
     while (open_set.count() != 0) {
-        const current = open_set.remove();
+        const current = open_set.pop().?;
 
         if (std.meta.eql(current.pos, goal)) {
             return reconstructPath(allocator, came_from, current.pos);
@@ -179,9 +179,9 @@ pub fn aStar(allocator: std.mem.Allocator, maze: std.AutoArrayHashMap(Vec2, u8),
             const tentative_g_score: i64 = g_score.get(current.pos).? + 1;
 
             if (tentative_g_score < (g_score.get(neighbor) orelse std.math.maxInt(i64))) {
-                try came_from.put(neighbor, current.pos);
-                try g_score.put(neighbor, tentative_g_score);
-                try open_set.add(.{ .pos = neighbor, .f_score = tentative_g_score + manhattanDistance(neighbor, goal) });
+                try came_from.put(allocator, neighbor, current.pos);
+                try g_score.put(allocator, neighbor, tentative_g_score);
+                try open_set.push(allocator, .{ .pos = neighbor, .f_score = tentative_g_score + manhattanDistance(neighbor, goal) });
             }
         }
     }
@@ -189,7 +189,7 @@ pub fn aStar(allocator: std.mem.Allocator, maze: std.AutoArrayHashMap(Vec2, u8),
     return error.PathNotFound;
 }
 
-fn reconstructPath(allocator: std.mem.Allocator, cameFrom: std.AutoArrayHashMap(Vec2, Vec2), current: Vec2) ![]Vec2 {
+fn reconstructPath(allocator: std.mem.Allocator, cameFrom: std.AutoArrayHashMapUnmanaged(Vec2, Vec2), current: Vec2) ![]Vec2 {
     var totalPath = std.array_list.Managed(Vec2).init(allocator);
     defer totalPath.deinit();
 
@@ -203,7 +203,7 @@ fn reconstructPath(allocator: std.mem.Allocator, cameFrom: std.AutoArrayHashMap(
     return totalPath.toOwnedSlice();
 }
 
-fn findChar(maze: std.AutoArrayHashMap(Vec2, u8), char: u8) !Vec2 {
+fn findChar(maze: std.AutoArrayHashMapUnmanaged(Vec2, u8), char: u8) !Vec2 {
     var iter = maze.iterator();
     while (iter.next()) |entry| {
         if (entry.value_ptr.* == char) {

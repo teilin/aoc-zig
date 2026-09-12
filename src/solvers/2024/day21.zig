@@ -1,6 +1,6 @@
 const std = @import("std");
 
-var gpa_impl = std.heap.GeneralPurposeAllocator(.{}){};
+var gpa_impl = std.heap.DebugAllocator(.{}){};
 
 const allocator = gpa_impl.allocator();
 
@@ -13,7 +13,6 @@ const dirpad_str = "#^A\n<v>";
 
 fn parse(content: []const u8) !Map {
     var map = Map.init(allocator);
-    defer map.deinit();
 
     var line_iter = std.mem.tokenizeSequence(u8, content, "\n");
     var y: i32 = 0;
@@ -94,8 +93,8 @@ fn getNeigbours(p: Point) [4]Point {
 }
 
 fn shortestPath(map: *Map, start: *Point, end: u8) !Path {
-    var frontier = std.PriorityQueue(PC, void, compPc).init(allocator, {});
-    defer frontier.deinit();
+    var frontier: std.PriorityQueue(PC, void, compPc) = .empty;
+    defer frontier.deinit(allocator);
 
     var visited = std.AutoHashMap(Point, usize).init(allocator);
     defer visited.deinit();
@@ -108,10 +107,10 @@ fn shortestPath(map: *Map, start: *Point, end: u8) !Path {
         }
     }
 
-    try frontier.add(PC{ .p = start.*, .c = 0, .path = iPath });
+    try frontier.push(allocator, PC{ .p = start.*, .c = 0, .path = iPath });
     defer for (frontier.items) |*f| @constCast(f).path.deinit();
 
-    while (frontier.removeOrNull()) |*cur| {
+    while (frontier.pop()) |*cur| {
         if (map.get(cur.p)) |c| {
             if (c == end) {
                 start.* = cur.p;
@@ -139,7 +138,7 @@ fn shortestPath(map: *Map, start: *Point, end: u8) !Path {
                             try npath.append('A');
                         }
                     }
-                    try frontier.add(PC{ .p = n, .c = cur.c + 1, .path = npath });
+                    try frontier.push(allocator, PC{ .p = n, .c = cur.c + 1, .path = npath });
                     try visited.put(n, cur.c + 1);
                 }
             }

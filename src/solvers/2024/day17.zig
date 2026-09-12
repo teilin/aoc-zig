@@ -1,6 +1,6 @@
 const std = @import("std");
 
-var gpa_impl = std.heap.GeneralPurposeAllocator(.{}){};
+var gpa_impl = std.heap.DebugAllocator(.{}){};
 const gpa = gpa_impl.allocator();
 
 const Op = enum {

@@ -97,17 +97,17 @@ fn parse(alloator: std.mem.Allocator, content: []const u8, start: *Point, end: *
 }
 
 fn part1(allocator: std.mem.Allocator, map: *Map, start: Point, end: Point) !usize {
-    var frontier = std.PriorityQueue(PC, void, compPc).init(allocator, {});
-    defer frontier.deinit();
+    var frontier: std.PriorityQueue(PC, void, compPc) = .empty;
+    defer frontier.deinit(allocator);
 
     std.debug.print("\nStart = {d},{d} END = {d} {d}", .{ start[0], start[1], end[0], end[1] });
 
     var visited = std.AutoHashMap(PD, usize).init(allocator);
     defer visited.deinit();
 
-    try frontier.add(PC{ .p = start, .c = 0, .d = Dir.E });
+    try frontier.push(allocator, PC{ .p = start, .c = 0, .d = Dir.E });
 
-    while (frontier.removeOrNull()) |*current| {
+    while (frontier.pop()) |*current| {
         if (current.p[0] == end[0] and current.p[1] == end[1]) {
             return current.c;
         }
@@ -128,7 +128,7 @@ fn part1(allocator: std.mem.Allocator, map: *Map, start: Point, end: Point) !usi
                     }
                 }
                 if (push) {
-                    try frontier.add(PC{ .p = l.p, .c = l.c, .d = l.d });
+                    try frontier.push(allocator, PC{ .p = l.p, .c = l.c, .d = l.d });
                     try visited.put(npd, l.c);
                 }
             }
@@ -138,8 +138,8 @@ fn part1(allocator: std.mem.Allocator, map: *Map, start: Point, end: Point) !usi
 }
 
 fn part2(allocator: std.mem.Allocator, map: *Map, start: Point, end: Point, best: usize) !usize {
-    var frontier = std.PriorityQueue(PC2, void, compPc2).init(allocator, {});
-    defer frontier.deinit();
+    var frontier: std.PriorityQueue(PC2, void, compPc2) = .empty;
+    defer frontier.deinit(allocator);
 
     var best_pos = std.AutoHashMap(Point, void).init(allocator);
     defer best_pos.deinit();
@@ -151,9 +151,9 @@ fn part2(allocator: std.mem.Allocator, map: *Map, start: Point, end: Point, best
 
     try ps.put(start, {});
 
-    try frontier.add(PC2{ .p = start, .c = 0, .d = Dir.E, .ps = ps });
+    try frontier.push(allocator, PC2{ .p = start, .c = 0, .d = Dir.E, .ps = ps });
 
-    while (frontier.removeOrNull()) |*current| {
+    while (frontier.pop()) |*current| {
         defer @constCast(current).ps.deinit();
 
         if (current.p[0] == end[0] and current.p[1] == end[1]) {
@@ -181,7 +181,7 @@ fn part2(allocator: std.mem.Allocator, map: *Map, start: Point, end: Point, best
                 if (push) {
                     var psc = try current.ps.clone();
                     try psc.put(l.p, {});
-                    try frontier.add(PC2{ .p = l.p, .c = l.c, .d = l.d, .ps = psc });
+                    try frontier.push(allocator, PC2{ .p = l.p, .c = l.c, .d = l.d, .ps = psc });
                     try visited.put(npd, l.c);
                 }
             }

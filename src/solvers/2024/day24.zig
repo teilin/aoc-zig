@@ -1,6 +1,6 @@
 const std = @import("std");
 
-var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+var gpa = std.heap.DebugAllocator(.{}){};
 const allocator = gpa.allocator();
 
 const Wire = enum {
@@ -287,7 +287,7 @@ fn solve_part2(wires: WireMap, ops: OpMap, rev_ops: ReverseOpMap) ![]u8 {
     }
 
     std.mem.sort([]const u8, problems.items, {}, cmp_str);
-    var res: [256]u8 = .{0} ** 256;
+    const res = try allocator.alloc(u8, 256);
     i = 0;
     for (problems.items) |name| {
         for (name) |char| {

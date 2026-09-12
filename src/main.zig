@@ -15,12 +15,12 @@ const usage_text =
 
 const Command = struct { raw_cmd: []const u8, argv: []const []const u8 };
 
-pub fn main() !void {
+pub fn main(init: std.process.Init.Minimal) !void {
     var arena_instance = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena_instance.deinit();
     const arena = arena_instance.allocator();
 
-    const args = try std.process.argsAlloc(arena);
+    const args = try init.args.toSlice(arena);
 
     var commands = std.array_list.Managed(Command).init(arena);
 
@@ -39,7 +39,7 @@ pub fn main() !void {
             });
         } else if (std.mem.eql(u8, arg, "-h") or std.mem.eql(u8, arg, "--help")) {
             // Print usage_text
-            return std.process.cleanExit();
+            return;
         } else if (std.mem.eql(u8, arg, "-y") or std.mem.eql(u8, arg, "--year")) {
             arg_i += 1;
             if (arg_i >= args.len) {
@@ -78,7 +78,7 @@ pub fn main() !void {
 
     const puzzel = try model.Puzzle.init(y, d);
 
-    var gpa = std.heap.GeneralPurposeAllocator(.{ .thread_safe = true }){};
+    var gpa = std.heap.DebugAllocator(.{ .thread_safe = true }){};
     const allocator = gpa.allocator();
 
     try Solver.init(allocator, puzzel);

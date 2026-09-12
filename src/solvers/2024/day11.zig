@@ -8,7 +8,7 @@ pub fn solve() !void {
     std.debug.print("Part 2 -> {d}\n", .{p2});
 }
 
-var cache = std.AutoArrayHashMap(@Vector(2, usize), usize).init(std.heap.page_allocator);
+var cache: std.AutoArrayHashMapUnmanaged(@Vector(2, usize), usize) = .empty;
 
 fn calculate(num: usize, n: usize) usize {
     const digits = if (num == 0) 0 else std.math.log10(num) + 1;
@@ -29,7 +29,7 @@ fn calculate(num: usize, n: usize) usize {
         } else {
             v = calculate(num * 2024, n - 1);
         }
-        cache.put(.{ num, n }, v) catch unreachable;
+        cache.put(std.heap.page_allocator, .{ num, n }, v) catch unreachable;
     }
     return cache.get(.{ num, n }).?;
 }

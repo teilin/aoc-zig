@@ -16,14 +16,14 @@ pub fn solve(allocator: std.mem.Allocator) !void {
 
 fn predictedWalking(allocator: std.mem.Allocator, content: []const u8) !u64 {
     var lines = std.mem.tokenizeSequence(u8, content, "\n");
-    var map = std.AutoArrayHashMap([2]i64, Visited).init(allocator);
-    defer map.deinit();
+    var map = std.AutoArrayHashMapUnmanaged([2]i64, Visited).empty;
+    defer map.deinit(allocator);
 
     var start_index: [2]i64 = undefined;
     var row: i64 = 0;
     while (lines.next()) |line| {
         for (0.., line) |col, char| {
-            try map.put(.{ row, @intCast(col) }, Visited{ .char = char, .visited = false });
+            try map.put(allocator, .{ row, @intCast(col) }, Visited{ .char = char, .visited = false });
             if (char == '^' or char == 'v' or char == '<' or char == '>') {
                 start_index = .{ row, @intCast(col) };
             }
@@ -35,7 +35,7 @@ fn predictedWalking(allocator: std.mem.Allocator, content: []const u8) !u64 {
     var curr_index = start_index;
     while (true) {
         const curr_char = map.get(curr_index).?.char;
-        try map.put(curr_index, Visited{ .char = curr_char, .visited = true });
+        try map.put(allocator, curr_index, Visited{ .char = curr_char, .visited = true });
         var next_index: [2]i64 = undefined;
         if (curr_dir == '^') {
             next_index = .{ curr_index[0] - 1, curr_index[1] };
