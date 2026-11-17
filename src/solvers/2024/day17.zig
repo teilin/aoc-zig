@@ -153,7 +153,7 @@ pub fn solve() !void {
     const trimmed = std.mem.trim(u8, text, "\n");
     std.debug.print("Part 1: {}\n", .{try p1(trimmed)});
 
-    var nums: [16]i64 = [_]i64{0} ** 16;
+    var nums: [16]i64 = @splat(0);
     nums[0] = 3;
     nums[1] = 0;
     nums[2] = 3;

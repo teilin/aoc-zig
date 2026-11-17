@@ -17,13 +17,13 @@ fn defragment(allocator: std.mem.Allocator, content: []const u8) !usize {
     var index: usize = 0;
     while (iter.next()) |w| : (index += 1) {
         const b = try std.fmt.charToDigit(w[0], 10);
-        const buf = [_]?usize{index} ** 9;
+        const buf: [9]?usize = @splat(index);
         try fragments.appendSlice(buf[0..b]);
 
         if (w.len == 1) break;
 
         const f = try std.fmt.charToDigit(w[1], 10);
-        const bufn = [_]?usize{null} ** 9;
+        const bufn: [9]?usize = @splat(null);
         try fragments.appendSlice(bufn[0..f]);
     }
 
@@ -50,13 +50,13 @@ fn fileMove(allocator: std.mem.Allocator, content: []const u8) !usize {
     var index: usize = 0;
     while (iter.next()) |w| : (index += 1) {
         const b = try std.fmt.charToDigit(w[0], 10);
-        const buf = [_]?usize{index} ** 9;
+        const buf: [9]?usize = @splat(index);
         try fragments.appendSlice(buf[0..b]);
 
         if (w.len == 1) break;
 
         const f = try std.fmt.charToDigit(w[1], 10);
-        const bufn = [_]?usize{null} ** 9;
+        const bufn: [9]?usize = @splat(null);
         try fragments.appendSlice(bufn[0..f]);
     }
 
@@ -79,7 +79,7 @@ fn fileMove(allocator: std.mem.Allocator, content: []const u8) !usize {
         }
         if (empty_pos) |e| {
             std.mem.copyForwards(?usize, slice[e .. e + len], fragments.items[pos_left .. pos_left + len]);
-            const bufn = [_]?usize{null} ** 9;
+            const bufn: [9]?usize = @splat(null);
             std.mem.copyForwards(?usize, fragments.items[pos_left .. pos_left + len], bufn[0..len]);
             continue;
         }

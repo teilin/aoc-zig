@@ -20,7 +20,7 @@ fn part1(alloc: std.mem.Allocator, content: []const u8) !u32 {
     var it_schematics = std.mem.splitSequence(u8, content, "\n\n");
     while (it_schematics.next()) |raw| {
         var it_row = std.mem.tokenizeScalar(u8, raw, '\n');
-        const is_lock: bool = if (std.mem.eql(u8, it_row.peek().?, "#" ** W)) true else false;
+        const is_lock: bool = if (std.mem.eql(u8, it_row.peek().?, &@as([W]u8, @splat('#')))) true else false;
         var schematic: [H][W]u8 = undefined;
         var row: usize = 0;
         while (it_row.next()) |row_schema| {

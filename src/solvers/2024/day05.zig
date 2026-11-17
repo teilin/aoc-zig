@@ -116,7 +116,7 @@ fn safeParseInt(num: []const u8) u32 {
 }
 
 inline fn parseRules(rules: []const u8) ![100][100]bool {
-    var edge: [100][100]bool = [_][100]bool{.{false} ** 100} ** 100;
+    var edge: [100][100]bool = @splat(@splat(false));
 
     var it = std.mem.tokenizeScalar(u8, rules, '\n');
     while (it.next()) |line| {
