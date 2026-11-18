@@ -6,6 +6,7 @@ Advent of Code (AOC) solutions in Zig programming language.
 
 * [2023](./notes/2023/README.md)
 * [2024](./notes/2024/README.md)
+* [2025](./notes/2025/README.md)
 
 ## Usage
 
