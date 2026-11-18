@@ -4,6 +4,8 @@
 #   make test                    - run `zig test` on every source file that contains tests
 #   make test YEAR=2024          - only test files for one year
 #   make run YEAR=2024 DAY=1     - build and run one puzzle
+#   make input YEAR=2025 DAY=7   - create src/solvers/2025/data/day07.txt (download or paste;
+#                                  see scripts/input.sh for the session cookie, FORCE=1, PASTE=1)
 #   make list                    - show the files `make test` will run
 #   make clean                   - remove build output
 #
@@ -22,7 +24,7 @@ TEST_DIR := $(if $(YEAR),$(SRC_DIR)/solvers/$(YEAR),$(SRC_DIR))
 TEST_RE  := ^\s*test\s*("|\{|[A-Za-z_])
 TEST_SRCS = $(sort $(shell grep -rlE --include='*.zig' '$(TEST_RE)' $(TEST_DIR) 2>/dev/null))
 
-.PHONY: all build test run list clean
+.PHONY: all build test run input list clean
 
 all: build
 
@@ -44,6 +46,10 @@ test:
 
 run:
 	$(ZIG) build run -Doptimize=$(OPTIMIZE) -- -y $(or $(YEAR),2024) -d $(DAY)
+
+input:
+	@test -n "$(YEAR)" || { echo "usage: make input YEAR=2025 DAY=7"; exit 2; }
+	@scripts/input.sh $(YEAR) $(DAY)
 
 list:
 	@for f in $(TEST_SRCS); do echo "$$f"; done
