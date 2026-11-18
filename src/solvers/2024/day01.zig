@@ -16,9 +16,12 @@ fn distance(allocator: std.mem.Allocator, content: []const u8, is_weighted: bool
     var readIter = std.mem.tokenizeSequence(u8, content, "\n");
 
     var left = std.array_list.Managed(i32).init(allocator);
+    defer left.deinit();
     var right = std.array_list.Managed(i32).init(allocator);
+    defer right.deinit();
 
     var counter = std.AutoHashMap(i32, i32).init(allocator);
+    defer counter.deinit();
 
     while (readIter.next()) |line| {
         var lineIter = std.mem.tokenizeSequence(u8, line, " ");
@@ -35,8 +38,10 @@ fn distance(allocator: std.mem.Allocator, content: []const u8, is_weighted: bool
     }
 
     const l = try left.toOwnedSlice();
+    defer allocator.free(l);
     std.mem.sort(i32, l, {}, comptime std.sort.asc(i32));
     const r = try right.toOwnedSlice();
+    defer allocator.free(r);
     std.mem.sort(i32, r, {}, comptime std.sort.asc(i32));
 
     var i: usize = 0;

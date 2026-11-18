@@ -108,5 +108,6 @@ test "part1 test" {
         \\Prize: X=18641, Y=10279
     ;
     const games = try parse(std.testing.allocator, content);
+    defer games.deinit();
     try std.testing.expectEqual(480, try play(games.items));
 }

@@ -271,5 +271,5 @@ test "part1 test" {
         \\v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^
     ;
 
-    try std.testing.expectEqual(0, try part1(std.testing.allocator, content));
+    try std.testing.expectEqual(10092, try part1(std.testing.allocator, content));
 }

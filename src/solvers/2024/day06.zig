@@ -86,12 +86,17 @@ fn numDifferentPossitions(allocator: std.mem.Allocator, content: []const u8) !u3
         try lines.append(owned);
     }
     const map = try lines.toOwnedSlice();
+    defer {
+        for (map) |line| allocator.free(line);
+        allocator.free(map);
+    }
 
     var sum: u32 = 0;
     for (0..map.len) |y| {
         for (0..map[0].len) |x| {
             var walker = Walker.init(map);
             var grid = try Grid.init(allocator, map);
+            defer grid.deinit(allocator);
             const x1 = @as(i32, @intCast(x));
             const y1 = @as(i32, @intCast(y));
 
@@ -108,6 +113,7 @@ fn numDifferentPossitions(allocator: std.mem.Allocator, content: []const u8) !u3
 
 fn loops(allocator: std.mem.Allocator, walker: *Walker, grid: *Grid) !bool {
     var seen = std.AutoHashMap(Walker, void).init(allocator);
+    defer seen.deinit();
     try seen.put(walker.*, {});
     while (true) {
         while (grid.ahead(walker) == '#') {
@@ -131,6 +137,7 @@ const Grid = struct {
 
     pub fn init(allocator: std.mem.Allocator, map: [][]u8) !Grid {
         var lines = std.array_list.Managed([]u8).init(allocator);
+        defer lines.deinit();
         for (map) |line| {
             const owned = try allocator.dupe(u8, line);
             try lines.append(owned);
@@ -142,6 +149,11 @@ const Grid = struct {
             .sizeY = copy.len,
             .sizeX = copy[0].len,
         };
+    }
+
+    pub fn deinit(self: *Grid, allocator: std.mem.Allocator) void {
+        for (self.map) |line| allocator.free(line);
+        allocator.free(self.map);
     }
 
     pub fn get(self: *Grid, x: i32, y: i32) ?u8 {

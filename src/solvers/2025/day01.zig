@@ -47,16 +47,16 @@ test "example" {
         \\R14
         \\L82
     ;
-    const answer = try solve(example);
+    const answer = try dialPassZero(example);
     try std.testing.expectEqual(@as(u32, 3), answer.part1);
     try std.testing.expectEqual(@as(u32, 6), answer.part2);
 }
 
 test "R1000 from 50 hits zero ten times" {
-    try std.testing.expectEqual(@as(u32, 10), (try solve("R1000")).part2);
+    try std.testing.expectEqual(@as(u32, 10), (try dialPassZero("R1000")).part2);
 }
 
 test "starting on zero doesn't count as a hit" {
-    try std.testing.expectEqual(@as(u32, 1), (try solve("L50\nL5")).part2);
-    try std.testing.expectEqual(@as(u32, 2), (try solve("L50\nL100")).part2);
+    try std.testing.expectEqual(@as(u32, 1), (try dialPassZero("L50\nL5")).part2);
+    try std.testing.expectEqual(@as(u32, 2), (try dialPassZero("L50\nL100")).part2);
 }

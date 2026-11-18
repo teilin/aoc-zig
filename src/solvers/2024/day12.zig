@@ -288,7 +288,7 @@ test "part2 test 2" {
         \\0X0X0
         \\00000
     ;
-    try std.testing.expectEqual(432, part2(std.testing.allocator, content));
+    try std.testing.expectEqual(436, part2(std.testing.allocator, content));
 }
 
 test "part2 test 3" {
